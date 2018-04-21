@@ -1,0 +1,108 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: SAV.bt
+//    Author: Andrew McRae
+//   Version: 0.2
+//   Purpose: SAV File parser
+//  Category: Misc
+//   History: 
+//   0.2   2016-03-30 Andrew McRae: Updated header for repo
+//   0.1   2012-06-01 Andrew McRae: Initial revision
+//------------------------------------------------
+
+DisplayFormatHex();
+LittleEndian();
+
+// UNICODE support
+// Thanks to Graeme Sweet for pointing this out!
+int CalcUnicodeLen() {
+    local quad pos = FTell();
+    local quad base = pos;
+    while ((ReadUShort(pos) != 0) && (pos - base < 65535)) {
+        pos += 2;
+    }
+    return (pos - base + 2) / 2;
+}
+
+typedef struct {
+    UINT16 s[CalcUnicodeLen()];
+} WCHAR <read=WCHAR_read>;
+
+string WCHAR_read(WCHAR &z) {
+    int len = sizeof(z.s) / 2;
+    char s[len];
+    ConvertUNICODEToASCIIW(len, z.s, s);
+    return s;
+}
+
+typedef struct {
+    UINT32 Length;
+    if (Length > 0) {
+        string d;
+    }
+} UTSTRING <read=UTSTRING_read>;
+
+string UTSTRING_read(UTSTRING &in) {
+    if (in.Length > 0) {
+        return in.d;
+    }
+    else {
+        return "";
+    }
+}
+
+typedef struct {
+    UINT32 Start;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UTSTRING Name;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+    UINT32 Unknown;
+} ENTRY <read=ENTRY_read>;
+
+string ENTRY_read(ENTRY &in) {
+    return UTSTRING_read(in.Name);
+}
+
+LittleEndian();
+
+SetBackColor(0xe0e0e0);
+
+local int i;
+
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+
+//UTSTRING Name;
+
+UINT32 Unknown;
+UINT32 EntrySize;
+UINT32 Unknown;
+UINT32 EntryCount;
+
+for (i = 0; i < EntryCount; i++) {
+    ENTRY e;
+}
+
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
+UINT32 Unknown;
