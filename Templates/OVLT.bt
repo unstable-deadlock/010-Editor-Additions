@@ -1,0 +1,181 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: OVLT.bt
+//    Author: Andrew McRae
+//   Version: 0.3
+//   Purpose: Parse Elite Dangerous compressed ovl texture block
+//  Category: Image
+//   History: 
+//   0.3   2016-03-30 Andrew McRae: Updated header for repo
+//   0.2   2015-08-03 Andrew McRae: Merge changes
+//   0.1   2015-08-01 Andrew McRae: Initial revision
+//------------------------------------------------
+
+typedef uint64 u8;
+typedef uint32 u4;
+typedef uint16 u2;
+typedef ubyte  u1;
+typedef int64  s8;
+typedef int32  s4;
+typedef int16  s2;
+typedef byte   s1;
+
+typedef struct {
+    u2 unknown00 <bgcolor=0xd8d8d8>;
+    u2 unknown02 <bgcolor=0xd8d8d8>;
+} FILE_HEAD1 <optimize=false,read=read_FILE_HEAD1>;
+string read_FILE_HEAD1(FILE_HEAD1 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh", in.unknown00, in.unknown02);
+    return out;
+}
+
+typedef struct {
+    u4 zero00 <bgcolor=cNone>;
+    u4 h2_size;
+    u4 h2_offset;
+    u4 file_hash <bgcolor=0xd8d8d8>;
+    u4 unknown10 <bgcolor=0xd8d8d8>;
+    u4 type_hash <bgcolor=0xd8d8d8>;
+    u4 zero18 <bgcolor=cNone>;
+
+    Assert(zero00 == 0, "FILE_HEAD2 zero00");
+    Assert(zero18 == 0, "FILE_HEAD2 zero18");
+} FILE_HEAD2 <optimize=false,read=read_FILE_HEAD2>;
+string read_FILE_HEAD2(FILE_HEAD2 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh %Xh %Xh %Xh %Xh %Xh", in.zero00, in.h2_size, in.h2_offset, in.file_hash, in.unknown10, in.type_hash, in.zero18);
+    return out;
+}
+
+typedef struct {
+    u4 file_hash;
+    u4 type_hash;
+    u4 unknown08 <bgcolor=0xd8d8d8>;
+    u4 unknown0C <bgcolor=0xd8d8d8>;
+    u4 unknown10 <bgcolor=0xd8d8d8>;
+    u4 file_length;
+} FILE_HEAD3 <optimize=false,read=read_FILE_HEAD3>;
+string read_FILE_HEAD3(FILE_HEAD3 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh %Xh %Xh %Xh %Xh", in.file_hash, in.type_hash, in.unknown08, in.unknown0C, in.unknown10, in.file_length);
+    return out;
+}
+
+typedef struct {
+    u4 unknown00 <bgcolor=0xd8d8d8>;
+    u4 unknown04 <bgcolor=0xd8d8d8>;
+    u4 unknown08 <bgcolor=0xd8d8d8>;
+    u4 file_length;
+} FILE_HEAD4 <optimize=false,read=read_FILE_HEAD4>;
+string read_FILE_HEAD4(FILE_HEAD4 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh %Xh %Xh", in.unknown00, in.unknown04, in.unknown08, in.file_length);
+    return out;
+}
+
+typedef struct {
+    u4 file_hash;
+    u4 type_hash;
+    u4 unknown08 <bgcolor=0xd8d8d8>;
+    u4 offset;
+} FILE_HEAD5 <optimize=false,read=read_FILE_HEAD5>;
+string read_FILE_HEAD5(FILE_HEAD5 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh %Xh %Xh", in.file_hash, in.type_hash, in.unknown08, in.offset);
+    return out;
+}
+
+typedef struct {
+    u4 unknown00 <bgcolor=0xd8d8d8>;
+    u4 offset1;
+    u4 unknown08 <bgcolor=0xd8d8d8>;
+    u4 offset2;
+} FILE_HEAD6 <optimize=false,read=read_FILE_HEAD6>;
+string read_FILE_HEAD6(FILE_HEAD6 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh %Xh %Xh", in.unknown00, in.offset1, in.unknown08, in.offset2);
+    return out;
+}
+
+typedef struct {
+    u4 unknown00 <bgcolor=0xd8d8d8>;
+    u4 unknown04 <bgcolor=0xd8d8d8>;
+} FILE_HEAD7 <optimize=false,read=read_FILE_HEAD7>;
+string read_FILE_HEAD7(FILE_HEAD7 &in) {
+    local string out;
+    SPrintf(out, "%Xh %Xh", in.unknown00, in.unknown04);
+    return out;
+}
+
+typedef struct (int fh1_count, int fh2_count, int fh3_count, int fh4_count, int fh5_count, int fh6_count, int fh7_count) {
+    if (fh1_count) {
+        FILE_HEAD1 fh1[fh1_count];
+    }
+    if (fh2_count) {
+        FILE_HEAD2 fh2[fh2_count];
+    }
+    if (fh3_count) {
+        FILE_HEAD3 fh3[fh3_count];
+    }
+    if (fh4_count) {
+        FILE_HEAD4 fh4[fh4_count];
+    }
+    if (fh5_count) {
+        FILE_HEAD5 fh5[fh5_count];
+    }
+    if (fh6_count) {
+        FILE_HEAD6 fh6[fh6_count];
+    }
+    if (fh7_count) {
+        FILE_HEAD7 fh7[fh7_count];
+    }
+
+    u8 sig;
+
+    Assert(sig == 0x010204083F7FBFFF, "HEADER signature not 0x010204083F7FBFFF");
+} HEADER;
+
+DisplayFormatHex();
+LittleEndian();
+
+local int header2_size = 0;
+local int data1_size = 0;
+local int data2_size = 0;
+
+//header2_size = 0x60; // StationIdents/Data.ovl
+//data2_size = 0x1ab00; // StationIdents/Data.ovl
+//header2_size = 0x1490; // Astro.ovl
+header2_size = 0x28; // Earth/Data.ovl
+data2_size = 0xaaac; // Earth/Data.ovl
+//header2_size = 8; // Earth/Data.ovs.textures_l0
+//data2_size = 0x2aaaaac; // Earth/Data.ovs.textures_l0
+//header2_size = 0x2a0; // Root_Final.ovl
+//data1_size = 0x0234; // Root_Final.ovl
+//data2_size = 0x5570; // Root_Final.ovl
+
+local int i;
+
+SetBackColor(0xb0b0b0);
+//HEADER h(1, 1, 4, 4, 4, 4, 1); // StationIdents/Data.ovl
+//HEADER h(2, 2, 0, 0, 23, 104, 1); // Astro.ovl
+HEADER h(1, 1, 1, 1, 1, 1, 1); // Earth/Data.ovl
+//HEADER h(1, 1, 1, 0, 0, 0, 1); // Earth/Data.ovs.textures_l0
+//HEADER h(2, 2, 5, 2, 5, 12, 1); // Root_Final.ovl
+//HEADER h(4, 4, 3, 3, 5, 13, 1); // FederationSymbol/Data.ovl
+
+if (header2_size) {
+    SetBackColor(0xffb0b0);
+    u1 h2[header2_size];
+}
+
+if (data1_size) {
+    SetBackColor(0xb0b0ff);
+    u1 d1[data1_size];
+}
+
+if (data2_size) {
+    SetBackColor(0xd0d0ff);
+    u1 d2[data2_size];
+}

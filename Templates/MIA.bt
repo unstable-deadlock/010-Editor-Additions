@@ -1,0 +1,53 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: MIA.bt
+//    Author: Andrew McRae
+//   Version: 0.2
+//   Purpose: MIA File parser
+//  Category: Misc
+//   History: 
+//   0.2   2016-03-30 Andrew McRae: Updated header for repo
+//   0.1   2014-01-24 Andrew McRae: Initial revision
+//------------------------------------------------
+
+typedef struct {
+    char type;
+
+    switch (type) {
+        case 'T':
+            string i;
+            break;
+        case 'I':
+            unsigned int i;
+            break;
+        case 'i':
+            signed int i;
+            break;
+        default:
+            return -1;
+    }
+} ITEM <read=readITEM>;
+
+string readITEM(ITEM &in) {
+    string out = "";
+    switch (in.type) {
+        case 'T':
+            out = in.i;
+            break;
+        case 'I':
+            SPrintf(out, "%u", in.i);
+            break;
+        case 'i':
+            SPrintf(out, "%d", in.i);
+            break;
+    }
+    return out;
+}
+
+DisplayFormatHex();
+LittleEndian();
+
+while (true) {
+    ITEM i;
+}
