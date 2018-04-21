@@ -1,0 +1,154 @@
+//--------------------------------------
+//--- 010 Editor v2.0 Binary Template
+//
+// File: EVT_Rec_Event.bt
+// Author: <Andreas.Schuster@telekom.de>
+// Revision: 1.1
+// Purpose: Windows Eventlog event record
+//--------------------------------------
+// Changes:
+// 1.0 - initial release.
+// 1.1 - added UNICODE string handling. Thanks to Graeme Sweet!
+//     - SID now displayed as string.
+//     - added some checks (length, bad magic).
+
+
+// Security IDentifier (SID)
+// Reference: http://blogs.msdn.com/oldnewthing/archive/2004/03/15/89753.aspx
+typedef struct {
+	ubyte		Revision;
+	ubyte		NumRids;
+	ubyte		Id[6];
+	uint32		Rid[NumRids];	
+	
+} SID_t <read=ReadSID>;
+
+string ReadSID( struct SID_t &sid ) {
+	local string ret;
+	local ubyte i;	
+	local quad id = 0;
+	local string ridstr;
+
+	for ( i=1; i<=5; i++) 
+		id = 256*id + sid.Id[i];
+	SPrintf( ret, "S-%u-%u", sid.Revision, id);
+
+	ret += sid.Id;
+	for ( i=0; i<sid.NumRids; i++ ) {
+		SPrintf( ridstr, "-%u", sid.Rid[i]);
+		ret += ridstr;
+	};
+	return ret;
+}
+
+
+// UNICODE support
+// Thanks to Graeme Sweet for pointing this out!
+int CalcUnicodeLen() {
+	local quad pos = FTell();
+	local quad base = pos;
+	while( (ReadUShort( pos ) != 0) && (pos - base < 65535) )
+		pos += 2;
+	return (pos - base + 2)/2;
+}
+
+typedef struct {
+	ushort str[ CalcUnicodeLen() ];
+} zstringw <read=ReadUNICODE>;
+
+string ReadUNICODE( struct zstringw &z ) {
+	local int len = sizeof(z.str)/2;
+	char s[len];
+	ConvertUNICODEToASCIIW( len, z.str, s );
+	return s;
+}
+
+
+// Event types
+typedef enum <uint16> {
+	SUCCESS		=  0,
+	ERROR		=  1,
+	WARNING		=  2,
+	INFORMATION	=  4,
+	AUDIT_SUCCESS	=  8,
+	AUDIT_FAILURE	= 16
+} type_e;
+
+
+// Event id
+typedef struct {
+	uint32		Code 		: 16;
+	uint32		Facility 	: 12;
+	uint32		reserved	: 1;
+	uint32		Customer	: 1;
+	uint32		Severity	: 2;
+} eventid_t;
+
+
+// ------------
+// Main routine
+// ------------
+
+// Position to cursor
+local quad start = GetCursorPos();
+FSeek(start);
+
+// Record
+// Reference: http://msdn.microsoft.com/library/en-us/debug/base/eventlogrecord_str.asp
+uint32		Length;
+if ( Length <= 0x38 ) {
+	Warning("Record too short.");
+	return 1;
+};
+char		Magic[4];
+if ( Memcmp( Magic, "LfLe", 4 ) ) {
+	Warning("Bad magic.");
+	return 1;
+};
+uint32		RecNumber;
+time_t		TimeGenerated;
+time_t		TimeWritten;
+eventid_t	EventId;
+type_e		EventType;
+uint16		NumInsertionStrings;
+uint16		EventCategory;
+uint16		reserved;
+uint32		ClosingRecord;
+uint32		OfsStrings;
+uint32		LenSID;
+uint32		OfsSID;
+uint32		LenEventData;
+uint32		OfsEventData;
+char		data[Length-60];
+uint32		Length;
+if ( Length[0] != Length[1] ) 
+	Warning("Possibly bad record, length mismatch %u/%u.", Length[0], Length[1]);
+
+
+// Detailed view of the data section:
+
+// Common strings
+FSeek(start + 0x38);
+zstringw	Source;
+zstringw	Computer;
+
+// SID
+if (LenSID > 0) {
+	FSeek(start + OfsSID);	
+	SID_t	SID;
+};
+
+// Insertion strings
+if (NumInsertionStrings > 0) {
+	FSeek(start + OfsStrings);
+	local int i;
+	for ( i=1; i<=NumInsertionStrings; i++ ) {
+		zstringw 	InsStr;
+	};
+};
+
+// Binary event data
+if (LenEventData > 0) {
+	FSeek(start + OfsEventData);
+	ubyte	EventData[LenEventData];
+};

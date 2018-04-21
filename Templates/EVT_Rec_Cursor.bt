@@ -1,0 +1,44 @@
+//--------------------------------------
+//--- 010 Editor v2.0 Binary Template
+//
+// File:    EVT_Rec_Cursor.bt
+// Author:  <Andreas.Schuster@telekom.de>
+// Revision: 1.1
+// Purpose: MS Windows Eventlog (.evt) CursorRecord
+//--------------------------------------
+// Changes:
+// 1.0 - initial release.
+// 1.1 - added checks for bad magic and length.
+
+// Values in the cursor record should be valid all the time.
+// Search for the cursor's magic 0x1111 1111 2222 2222 
+// 3333 3333 4444 4444 to locate the reocrd.
+
+
+// build expected magic string
+local char expected[16];
+local byte i;
+for (i=0; i<16; i++) 
+	expected[i] = (Floor( i/4 ) + 1) * 0x11;
+
+// position at cursor
+FSeek(GetCursorPos());
+
+// record
+uint32		Length;
+if ( 0x28 != Length ) {
+	Warning("Bad length, expected %u got %u.", 0x28, Length);
+	return 1;
+};
+char		Magic[16];
+if ( Memcmp( Magic, expected, 16 ) ) {
+	Warning("Bad magic.");
+	return 1;
+};
+uint32		OfsFirst <format=hex>;	// offset of first record
+uint32		OfsNext <format=hex>;	// offset of next record to write
+uint32		NumNext;		// number of first record
+uint32		NumFirst;		// number to assign to the next record
+uint32		Length;
+if ( Length[0] != Length[1] ) 
+	Warning("Possibly bad record, length mismatch %u/%u.", Length[0], Length[1]);

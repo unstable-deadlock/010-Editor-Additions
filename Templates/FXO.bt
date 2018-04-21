@@ -1,0 +1,480 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: FXO.bt
+//    Author: Andrew McRae
+//   Version: 0.3
+//   Purpose: binary DX FX 4/5 files
+//  Category: Programming
+// File Mask: *.fxo
+//   History: 
+//   0.3   2016-03-30 Andrew McRae: Updated header for repo
+//   0.2   2015-11-04 Andrew McRae: Merge changes
+//   0.1   2012-06-01 Andrew McRae: Initial revision
+//------------------------------------------------
+
+DisplayFormatHex();
+
+typedef uint64 u8;
+typedef uint32 u4;
+typedef uint16 u2;
+typedef ubyte  u1;
+typedef int64  s8;
+typedef int32  s4;
+typedef int16  s2;
+typedef byte   s1;
+
+local quad _data_start;
+
+string read_sig(u4 &in) {
+    local string out;
+    local string ver;
+    switch(in & 0xffff) {
+        case 0x0901:
+            ver = "fx_2_0";
+            break;
+        case 0x1001:
+            ver = "fx_4_0";
+            break;
+        case 0x1011:
+            ver = "fx_4_1";
+            break;
+        case 0x2001:
+            ver = "fx_5_0";
+            break;
+        default:
+            SPrintf(ver, "(%04X)", in & 0xffff);
+            break;
+    }
+    SPrintf(out, "%s %s", IsBigEndian() ? "BE" : "LE", ver);
+    return out;
+}
+
+typedef struct {
+    u4 sig;
+    u4 data_offset;
+} HEADER <read=read_HEADER>;
+string read_HEADER(HEADER &in) {
+    return read_sig(in.sig);
+}
+
+typedef struct {
+    local quad _pos, _padding;
+
+    u4 offset <hidden=true>;
+
+    _pos = FTell();
+    FSeek(_data_start + offset);
+
+    SetBackColor(0xffffc0);
+    u4 size <hidden=true>;
+
+    if (size) {
+        SetBackColor(0xffff98);
+        char n[size];
+
+        _padding = 4 - (FTell() & 3);
+        if (_padding > 0 && _padding < 4) {
+            SetForeColor(cGray);
+            SetBackColor(0xffffff);
+            u1 _p[_padding] <hidden=true>;
+            SetForeColor(cBlack);
+        }
+    } else {
+        local string n = "";
+    }
+    FSeek(_pos);
+} D3DX_NAME <read=read_D3DX_NAME,optimize=false>;
+string read_D3DX_NAME(D3DX_NAME &in) {
+    local string out;
+    if (in.size) {
+        SPrintf(out, "'%s'", in.n);
+    } else {
+        out = "";
+    }
+    return out;
+}
+
+typedef enum <u4> {
+    SYMTYPE_VOID,
+    SYMTYPE_BOOL,
+    SYMTYPE_INT,
+    SYMTYPE_FLOAT,
+    SYMTYPE_STRING,
+    SYMTYPE_TEXTURE,
+    SYMTYPE_TEXTURE1D,
+    SYMTYPE_TEXTURE2D,
+    SYMTYPE_TEXTURE3D,
+    SYMTYPE_TEXTURECUBE,
+    SYMTYPE_SAMPLER,
+    SYMTYPE_SAMPLER1D,
+    SYMTYPE_SAMPLER2D,
+    SYMTYPE_SAMPLER3D,
+    SYMTYPE_SAMPLERCUBE,
+    SYMTYPE_PIXELSHADER,
+    SYMTYPE_VERTEXSHADER,
+    SYMTYPE_PIXELFRAGMENT,
+    SYMTYPE_VERTEXFRAGMENT,
+    SYMTYPE_UNSUPPORTED
+} D3DX_SYMTYPE;
+
+typedef enum <u4> {
+    SYMCLASS_SCALAR,
+    SYMCLASS_VECTOR,
+    SYMCLASS_MATRIX_ROWS,
+    SYMCLASS_MATRIX_COLUMNS,
+    SYMCLASS_OBJECT,
+    SYMCLASS_STRUCT
+} D3DX_SYMCLASS;
+
+typedef enum <u4>
+{
+    SAMP_UNKNOWN0,
+    SAMP_UNKNOWN1,
+    SAMP_UNKNOWN2,
+    SAMP_UNKNOWN3,
+    SAMP_TEXTURE,
+    SAMP_ADDRESSU,
+    SAMP_ADDRESSV,
+    SAMP_ADDRESSW,
+    SAMP_BORDERCOLOR,
+    SAMP_MAGFILTER,
+    SAMP_MINFILTER,
+    SAMP_MIPFILTER,
+    SAMP_MIPMAPLODBIAS,
+    SAMP_MAXMIPLEVEL,
+    SAMP_MAXANISOTROPY,
+    SAMP_SRGBTEXTURE,
+    SAMP_ELEMENTINDEX,
+    SAMP_DMAPOFFSET
+} D3DX_EFFECT_SAMPLER;
+
+struct D3DX_EFFECT_VALUE;
+typedef struct {
+    D3DX_EFFECT_SAMPLER stype: 5;
+    u4 unknown: 27;
+    u4 unknown;
+    D3DX_EFFECT_VALUE value;
+} D3DX_VALUE_SAMPLER <optimize=false>;
+
+typedef struct {
+    local quad _pos;
+
+    u4 typedef_offset <hidden=true>;
+    u4 value_offset <hidden=true>;
+
+    _pos = FTell();
+    FSeek(_data_start + typedef_offset);
+
+    SetBackColor(0xc0c0ff);
+    D3DX_SYMTYPE type;
+    D3DX_SYMCLASS class;
+    D3DX_NAME name;
+    SetBackColor(0xc0c0ff);
+    D3DX_NAME semantic;
+    SetBackColor(0xc0c0ff);
+    u4 element_count <format=decimal>;
+
+    switch(class) {
+        case SYMCLASS_STRUCT:
+            Warning("SYMCLASS_STRUCT not supported");
+            Printf("SYMCLASS_STRUCT not supported\n");
+            break;
+        case SYMCLASS_OBJECT:
+            if (type == SYMTYPE_SAMPLER || type == SYMTYPE_SAMPLER1D || type == SYMTYPE_SAMPLER2D || type == SYMTYPE_SAMPLER3D) {
+                FSeek(_data_start + value_offset);
+                SetBackColor(0x9898ff);
+                u4 state_count <format=decimal>;
+                if (state_count) {
+                    D3DX_VALUE_SAMPLER s[state_count];
+                }
+            } else {
+                local u4 object_count = 1;
+                if (element_count) {
+                    object_count = element_count;
+                }
+                FSeek(_data_start + value_offset);
+                SetBackColor(0x9898ff);
+                u4 v[object_count];
+            }
+            break;
+        default:
+            local u4 value_count = 1;
+            if (element_count) {
+                value_count = element_count;
+            }
+            u4 column_count <format=decimal>;
+            u4 row_count <format=decimal>;
+            if (column_count * row_count) {
+                FSeek(_data_start + value_offset);
+                SetBackColor(0x9898ff);
+                if (type == SYMTYPE_FLOAT) {
+                    float v[column_count * row_count * value_count];
+                } else {
+                    u4 v[column_count * row_count * value_count];
+                }
+            }
+            break;
+    }
+
+    FSeek(_pos);
+} D3DX_EFFECT_VALUE <read=read_D3DX_EFFECT_VALUE,optimize=false>;
+string read_D3DX_EFFECT_VALUE(D3DX_EFFECT_VALUE &in) {
+    local string out;
+    SPrintf(out, "%s %s %s", read_D3DX_NAME(in.name), EnumToString(in.class), EnumToString(in.type));
+    return out;
+}
+
+typedef struct {
+    D3DX_EFFECT_VALUE value;
+    u4 flags;
+    u4 annotation_count <format=decimal>;
+
+    if (annotation_count) {
+        D3DX_EFFECT_VALUE a[annotation_count];
+    }
+} D3DX_PARAMETER <read=read_D3DX_PARAMETER,optimize=false>;
+string read_D3DX_PARAMETER(D3DX_PARAMETER &in) {
+    return read_D3DX_EFFECT_VALUE(in.value);
+}
+
+typedef enum <u4> {
+    RS_ZENABLE,
+    RS_FILLMODE,
+    RS_SHADEMODE,
+    RS_ZWRITEENABLE,
+    RS_ALPHATESTENABLE,
+    RS_LASTPIXEL,
+    RS_SRCBLEND,
+    RS_DESTBLEND,
+    RS_CULLMODE,
+    RS_ZFUNC,
+    RS_ALPHAREF,
+    RS_ALPHAFUNC,
+    RS_DITHERENABLE,
+    RS_ALPHABLENDENABLE,
+    RS_FOGENABLE,
+    RS_SPECULARENABLE,
+    RS_FOGCOLOR,
+    RS_FOGTABLEMODE,
+    RS_FOGSTART,
+    RS_FOGEND,
+    RS_FOGDENSITY,
+    RS_RANGEFOGENABLE,
+    RS_STENCILENABLE,
+    RS_STENCILFAIL,
+    RS_STENCILZFAIL,
+    RS_STENCILPASS,
+    RS_STENCILFUNC,
+    RS_STENCILREF,
+    RS_STENCILMASK,
+    RS_STENCILWRITEMASK,
+    RS_TEXTUREFACTOR,
+    RS_WRAP0,
+    RS_WRAP1,
+    RS_WRAP2,
+    RS_WRAP3,
+    RS_WRAP4,
+    RS_WRAP5,
+    RS_WRAP6,
+    RS_WRAP7,
+    RS_WRAP8,
+    RS_WRAP9,
+    RS_WRAP10,
+    RS_WRAP11,
+    RS_WRAP12,
+    RS_WRAP13,
+    RS_WRAP14,
+    RS_WRAP15,
+    RS_CLIPPING,
+    RS_LIGHTING,
+    RS_AMBIENT,
+    RS_FOGVERTEXMODE,
+    RS_COLORVERTEX,
+    RS_LOCALVIEWER,
+    RS_NORMALIZENORMALS,
+    RS_DIFFUSEMATERIALSOURCE,
+    RS_SPECULARMATERIALSOURCE,
+    RS_AMBIENTMATERIALSOURCE,
+    RS_EMISSIVEMATERIALSOURCE,
+    RS_VERTEXBLEND,
+    RS_CLIPPLANEENABLE,
+    RS_POINTSIZE,
+    RS_POINTSIZE_MIN,
+    RS_POINTSPRITEENABLE,
+    RS_POINTSCALEENABLE,
+    RS_POINTSCALE_A,
+    RS_POINTSCALE_B,
+    RS_POINTSCALE_C,
+    RS_MULTISAMPLEANTIALIAS,
+    RS_MULTISAMPLEMASK,
+    RS_PATCHEDGESTYLE,
+    RS_DEBUGMONITORTOKEN,
+    RS_POINTSIZE_MAX,
+    RS_INDEXEDVERTEXBLENDENABLE,
+    RS_COLORWRITEENABLE,
+    RS_TWEENFACTOR,
+    RS_BLENDOP,
+    RS_POSITIONDEGREE,
+    RS_NORMALDEGREE,
+    RS_SCISSORTESTENABLE,
+    RS_SLOPESCALEDEPTHBIAS,
+    RS_ANTIALIASEDLINEENABLE,
+    RS_MINTESSELLATIONLEVEL,
+    RS_MAXTESSELLATIONLEVEL,
+    RS_ADAPTIVETESS_X,
+    RS_ADAPTIVETESS_Y,
+    RS_ADAPTIVETESS_Z,
+    RS_ADAPTIVETESS_W,
+    RS_ENABLEADAPTIVETESSELLATION,
+    RS_TWOSIDEDSTENCILMODE,
+    RS_CCW_STENCILFAIL,
+    RS_CCW_STENCILZFAIL,
+    RS_CCW_STENCILPASS,
+    RS_CCW_STENCILFUNC,
+    RS_COLORWRITEENABLE1,
+    RS_COLORWRITEENABLE2,
+    RS_COLORWRITEENABLE3,
+    RS_BLENDFACTOR,
+    RS_SRGBWRITEENABLE,
+    RS_DEPTHBIAS,
+    RS_SEPARATEALPHABLENDENABLE,
+    RS_SRCBLENDALPHA,
+    RS_DESTBLENDALPHA,
+    RS_BLENDOPALPHA,
+    RS_VERTEXSHADER = 146,
+    RS_PIXELSHADER = 147
+} D3DX_RENDERSTATE;
+
+typedef struct {
+    D3DX_RENDERSTATE operation;
+    s4 index <format=decimal>;
+    D3DX_EFFECT_VALUE value;
+} D3DX_STATE <optimize=false>;
+
+typedef struct {
+    D3DX_NAME name;
+    u4 annotation_count <format=decimal>;
+    u4 state_count <format=decimal>;
+
+    if (annotation_count) {
+        D3DX_EFFECT_VALUE a[annotation_count];
+    }
+
+    if (state_count) {
+        D3DX_STATE s[state_count];
+    }
+} D3DX_PASS <read=read_D3DX_PASS,optimize=false>;
+string read_D3DX_PASS(D3DX_PASS &in) {
+    return read_D3DX_NAME(in.name);
+}
+
+typedef struct {
+    D3DX_NAME name;
+    u4 annotation_count <format=decimal>;
+    u4 pass_count <format=decimal>;
+
+    if (annotation_count) {
+        D3DX_EFFECT_VALUE a[annotation_count];
+    }
+
+    if (pass_count) {
+        D3DX_PASS p[pass_count];
+    }
+} D3DX_TECHNIQUE <read=read_D3DX_TECHNIQUE,optimize=false>;
+string read_D3DX_TECHNIQUE(D3DX_TECHNIQUE &in) {
+    return read_D3DX_NAME(in.name);
+}
+
+typedef struct {
+    s4 index <format=decimal>;
+    u4 size <hidden=true>;
+    if (size) {
+        SetBackColor(0xb0ffb0);
+        u1 data[size];
+    }
+} D3DX_SMALL <optimize=false>;
+
+typedef struct {
+    s4 technique_index <format=decimal>;
+    s4 index <format=decimal>;
+    s4 element_index <format=decimal>;
+    s4 state_index <format=decimal>;
+    u4 usage;
+    u4 size <hidden=true>;
+    if (size) {
+        SetBackColor(0xb0ffb0);
+        u1 data[size];
+    }
+} D3DX_LARGE <optimize=false>;
+
+typedef struct {
+    local int i, _padding;
+
+    u4 parameter_count <format=decimal>;
+    u4 technique_count <format=decimal>;
+    u4 unknown_count <format=decimal>;
+    u4 object_count <format=decimal>;
+
+    if (parameter_count) {
+        D3DX_PARAMETER p[parameter_count];
+    }
+
+    if (technique_count) {
+        D3DX_TECHNIQUE t[technique_count];
+    }
+
+    u4 small_count <format=decimal>;
+    u4 large_count <format=decimal>;
+
+    if (small_count) {
+        SetBackColor(0xd0ffd0);
+        D3DX_SMALL s[small_count];
+    }
+
+    for (i = 0; i < large_count; i++) {
+        SetBackColor(0xd0ffd0);
+        D3DX_LARGE r;
+
+        _padding = 4 - (FTell() & 3);
+        if (_padding > 0 && _padding < 4) {
+            SetForeColor(cGray);
+            SetBackColor(0xffffff);
+            u1 _p[_padding] <hidden=true>;
+            SetForeColor(cBlack);
+        }
+    }
+} D3DX_EFFECT <optimize=false>;
+
+local u4 _sig, _ver;
+LittleEndian();
+_sig = ReadUInt(0);
+
+if ((_sig & 0xffff0000) == 0xfeff0000) {
+    LittleEndian();
+} else if ((_sig & 0xffff) == 0xfffe) {
+    BigEndian();
+    _sig = ReadUInt(0);
+    Warning("BigEndian");
+} else {
+    Warning("Bad sig!");
+    Printf("Bad sig!\n");
+    return -1;
+}
+
+_ver = _sig & 0xffff;
+if (_ver > 0x0901) {
+    Warning("Unsupported version!");
+    Printf("Unsupported version! %04X\n", _ver);
+    return -1;
+}
+
+SetBackColor(0xc0c0c0);
+HEADER h;
+
+SetBackColor(0xf0f0f0);
+_data_start = FTell();
+FSeek(_data_start + h.data_offset);
+
+SetBackColor(0xffd0d0);
+D3DX_EFFECT e;

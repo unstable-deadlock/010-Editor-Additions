@@ -1,0 +1,31 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: GRM.bt
+//    Author: Andrew McRae
+//   Version: 0.2
+//   Purpose: GRM File parser
+//  Category: Misc
+//   History: 
+//   0.2   2016-03-30 Andrew McRae: Updated header for repo
+//   0.1   2012-06-01 Andrew McRae: Initial revision
+//------------------------------------------------
+
+typedef struct {
+    uint hash;
+    uint offset;
+    uint packed;
+    uint unpacked;
+} FILE_ENTRY;
+
+typedef struct {
+    uchar signature[4];
+    uint filecount;
+    FILE_ENTRY f[filecount];
+} HEADER;
+
+DisplayFormatHex();
+LittleEndian();
+
+SetBackColor(0xe0e0e0);
+HEADER h;

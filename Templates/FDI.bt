@@ -1,0 +1,231 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: FDI.bt
+//    Author: Andrew McRae
+//   Version: 0.3
+//   Purpose: FDI disk image parser
+//  Category: Drives
+// File Mask: *.fdi
+//  ID Bytes: 46 6F 72 6D 61 74 74 65 64 20 44 69 73 6B 20 49 6D 61 67 65 20 66 69 6C 65 0D 0A // Formatted Disk Image file
+//   History: 
+//   0.3   2016-03-30 Andrew McRae: Updated header for repo
+//   0.2   2016-03-16 Andrew McRae: Merge changes
+//   0.1   2016-03-04 Andrew McRae: Initial revision
+//------------------------------------------------
+
+typedef uint64 u8;
+typedef uint32 u4;
+typedef uint16 u2;
+typedef ubyte  u1;
+typedef int64  s8;
+typedef int32  s4;
+typedef int16  s2;
+typedef byte   s1;
+
+typedef enum <u1> {
+    T_48 = 0, T_67, T_96, T_100, T_135, T_192
+} TPI;
+
+typedef struct {
+    char signature[25];
+    char nl0[2] <hidden=true>;
+    char creator[30];
+    char nl1[2] <hidden=true>;
+    char comment[80];
+    char eof[1] <hidden=true>;
+    u1 version_hi <format=decimal>;
+    u1 version_lo <format=decimal>;
+    u2 ltrack <format=decimal>;
+    u1 lhead <format=decimal>;
+    enum <u1> { D_8 = 0, D_5_25, D_3_5, D_3 } type;
+    u1 rotspeed <read=read_rotspeed>;
+    u1 flags_res : 5 <hidden=true>;
+    u1 flags_rev : 1;
+    u1 flags_idx : 1;
+    u1 flags_wp : 1;
+    TPI tpi;
+    TPI headwidth;
+    u2 res <hidden=true>;
+    u2 tracks[176];
+    u4 dataCRC;
+    u4 headerCRC;
+} HEADER;
+string read_rotspeed(u1 rotspeed) {
+    local string out;
+    SPrintf(out, "%d rpm", rotspeed+128);
+    return out;
+}
+
+typedef struct (quad _track, quad _head) {
+    local quad track, head;
+    local quad _pos;
+
+    track = _track;
+    head = _head;
+
+    _pos = FTell();
+
+    FSeek((_track * ((quad)h.lhead + 1) + _head) * 2 + 0x98);
+    SetBackColor(0xe0e0e0);
+    u2 type: 8;
+    u2 size: 8;
+
+    SetBackColor(0xc0ffff);
+    FSeek(_pos);
+    u1 data[1] <hidden=true>;
+} TRACK_EMPTY <read=read_TRACK_EMPTY>;
+string read_TRACK_EMPTY(TRACK_EMPTY &in) {
+    local string out;
+    SPrintf(out, "%2d %d", in.track, in.head);
+    return out;
+}
+
+typedef struct (quad _track, quad _head) {
+    local quad track, head;
+    local quad _pos;
+
+    track = _track;
+    head = _head;
+
+    Warning("Unknown track type at %d %d: %02x", track, head, _type);
+    Printf("Unknown track type at %d %d: %02x\n", track, head, _type);
+
+    _pos = FTell();
+
+    FSeek((_track * ((quad)h.lhead + 1) + _head) * 2 + 0x98);
+    SetBackColor(0xe0e0e0);
+    u2 type: 8;
+    u2 size: 8;
+
+    SetBackColor(0xc0ffff);
+    FSeek(_pos);
+} TRACK <read=read_TRACK>;
+string read_TRACK(TRACK &in) {
+    local string out;
+    SPrintf(out, "%2d %d %x", in.track, in.head, in.type);
+    return out;
+}
+
+typedef struct {
+    SetBackColor(0xb0e0b0);
+    BitfieldDisablePadding();
+    enum <u4> { C_NONE = 0, C_HUFF, C_RES1, C_RES2 } comp: 2;
+    u4 size: 22 <format=decimal>;
+    BitfieldEnablePadding();
+} PS_SIZE <read=read_PS_SIZE>;
+string read_PS_SIZE(PS_SIZE &in) {
+    local string out;
+    SPrintf(out, "%d %s", in.size, EnumToString(in.comp));
+    return out;
+}
+
+typedef struct (quad _size) {
+    local quad _pos;
+    if (_size > 0) {
+        SetBackColor(0xd0ffd0);
+        u1 sign_ext : 1;
+        u1 low_bits : 7;
+        u1 bits : 1;
+        u1 high_bits : 7;
+        u1 d[_size - 2];
+    }
+} HUFF;
+
+typedef struct (quad _track, quad _head) {
+    local quad track, head;
+    local quad _pos, _end;
+
+    track = _track;
+    head = _head;
+
+    _pos = FTell();
+
+    FSeek((_track * ((quad)h.lhead + 1) + _head) * 2 + 0x98);
+    SetBackColor(0xe0e0e0);
+    u2 type: 2 <hidden=true>;
+    u2 size: 14;
+
+    FSeek(_pos);
+    _end = _pos + size * 256;
+
+    SetBackColor(0xb0e0b0);
+    u4 numpulses <format=decimal>;
+    PS_SIZE avg;
+    PS_SIZE min;
+    PS_SIZE max;
+    PS_SIZE idx;
+
+    SetBackColor(0xd0ffd0);
+    if (avg.size > 0) {
+        if (avg.comp == C_HUFF) {
+            HUFF davg(avg.size);
+        } else {
+            u1 davg[avg.size];
+        }
+    }
+    if (min.size > 0) {
+        if (min.comp == C_HUFF) {
+            HUFF dmin(min.size);
+        } else {
+            u1 dmin[min.size];
+        }
+    }
+    if (max.size > 0) {
+        if (max.comp == C_HUFF) {
+            HUFF dmax(max.size);
+        } else {
+            u1 dmax[max.size];
+        }
+    }
+    if (idx.size > 0) {
+        if (idx.comp == C_HUFF) {
+            HUFF didx(idx.size);
+        } else {
+            u1 didx[idx.size];
+        }
+    }
+
+    if (_end - FTell() > 0) {
+        SetBackColor(0xf0fff0);
+        u1 padding[_end - FTell()] <hidden=true>;
+    }
+} TRACK_PULSE <read=read_TRACK_PULSE>;
+string read_TRACK_PULSE(TRACK_PULSE &in) {
+    local string out;
+    SPrintf(out, "%2d %d", in.track, in.head);
+    return out;
+}
+
+local int _t, _h, _type;
+local quad _pos;
+
+DisplayFormatHex();
+BigEndian();
+
+local char _sig[25];
+ReadBytes(_sig, 0, 25);
+if (_sig != "Formatted Disk Image file") {
+    Warning("Bad sig!");
+    Printf("Bad sig!\n");
+    return -1;
+}
+
+SetBackColor(0xc0c0c0);
+HEADER h;
+
+for (_t = 0; _t <= h.ltrack; _t++) {
+    for (_h = 0; _h <= h.lhead; _h++) {
+        _type = h.tracks[_t * (h.lhead + 1) + _h] >> 8;
+        if (_type == 0) {
+            _pos = FTell();
+            FSeek(_pos - 1);
+            TRACK_EMPTY t(_t, _h);
+            FSeek(_pos);
+        } else if ((_type & 0xC0) == 0x80) {
+            TRACK_PULSE t(_t, _h);
+        } else {
+            TRACK t(_t, _h);
+        }
+    }
+}

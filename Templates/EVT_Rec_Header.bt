@@ -1,0 +1,46 @@
+//--------------------------------------
+//--- 010 Editor v2.0 Binary Template
+//
+// File:    EVT_Rec_Header.bt
+// Author:  <Andreas.Schuster@telekom.de>
+// Revision: 1.1
+// Purpose: MS Windows Eventlog (.evt) HeaderRecord
+//--------------------------------------
+// 1.0 - initial release.
+// 1.1 - added some checks (length, bad magic and DIRTY flag).
+
+// CAVE: If the DIRTY flag is raised most values will be outdated.
+//       Refer to the cursor record instead.
+
+
+// position at cursor
+FSeek(GetCursorPos());
+
+// record
+uint32		Length;
+if ( 0x30 != Length ) {
+	Warning("Bad length, expected %u got %u.", 0x30, Length);
+	return 1;
+};
+char		Magic[4];
+if ( Memcmp( Magic, "LfLe", 4 ) ) {
+	Warning("Bad magic.");
+	return 1;
+};
+uint32		unknown1;		// should be 1
+uint32		unknown2;		// should be 1
+uint32		OfsFirst <format=hex>;	// offset of first record
+uint32		OfsNext <format=hex>;	// offset of next record to write
+uint32		NumNext;		// number of first record
+uint32		NumFirst;		// number to assign to the next record
+uint32		Filesize <format=hex>;	// set only during recovery
+uint32		Flag_DIRTY	: 1;	// unsaved changes
+if ( Flag_DIRTY ) 
+	Warning("Log file is DIRTY, header info might be invalid.");
+uint32		Flag_WRAPPED	: 1;	// log wrapped around
+uint32		Flag_LOGFULL	: 1;	// log can't accept new records
+uint32		Flag_PRIMARY	: 1;	// log is no backup
+uint32		Retention;		// minimum time to keep records (in secs.)
+uint32		Length;
+if ( Length[0] != Length[1] ) 
+	Warning("Possibly bad record, length mismatch %u/%u.", Length[0], Length[1]);

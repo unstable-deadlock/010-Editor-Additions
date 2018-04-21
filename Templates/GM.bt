@@ -1,0 +1,1601 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: GM.bt
+//    Author: Andrew McRae
+//   Version: 0.3
+//   Purpose: GameMaker data file template
+//  Category: Archive
+// File Mask: data.win
+//  ID Bytes: 46 4F 52 4D // FORM
+//   History: 
+//   0.3   2016-03-30 Andrew McRae: Updated header for repo
+//   0.2   2015-11-02 Andrew McRae: Merge changes
+//   0.1   2015-10-28 Andrew McRae: Initial revision
+//------------------------------------------------
+
+typedef uint64 u8;
+typedef uint32 u4;
+typedef uint16 u2;
+typedef ubyte  u1;
+typedef int64  s8;
+typedef int32  s4;
+typedef int16  s2;
+typedef byte   s1;
+
+typedef struct {
+    SetBackColor(0xd8d8d8);
+
+    char tag[4];
+    u4 size;
+} HEAD <read=read_HEAD>;
+string read_HEAD(HEAD &in) {
+    local string out;
+    SPrintf(out, "%s %Xh", in.tag, in.size);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    if (h.size) {
+        SetBackColor(0xc0c0c0);
+        u1 d[h.size];
+    }
+} DATA <read=read_DATA,optimize=false>;
+string read_DATA(DATA &in) {
+    return read_HEAD(in.h);
+}
+
+typedef struct {
+    SetBackColor(0xffb8b8);
+    u4 o;
+
+    if (o) {
+        local quad _pos = FTell();
+        FSeek(o);
+        SetBackColor(0xffa0a0);
+        string s;
+        FSeek(_pos);
+    } else {
+        local string s = "";
+    }
+} STR <read=read_STR,optimize=false>;
+string read_STR(STR &in) {
+    local string out;
+    SPrintf(out, "'%s'", in.s);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x84) {
+        Printf("short GEN8 at %Xh %Xh < 84h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        u4 d00;
+        STR s04;
+        STR s08;
+        u4 d0C;
+        u4 d10;
+        u4 game_id;
+        u4 d18;
+        u4 d1C;
+        u4 d20;
+        u4 d24;
+        STR s28;
+        u4 d2C;
+        u4 d30;
+        u4 d34;
+        u4 d38;
+        u4 d3C;
+        u4 d40;
+        u4 d44;
+        u4 d48;
+        u4 d4C;
+        u4 d50;
+        u4 d54;
+        u4 d58;
+        time_t build_time;
+        u4 d60;
+        STR s64;
+        u4 d68;
+        u4 d6C;
+        u4 d70;
+        u4 d74;
+        u4 d78;
+        u4 d7C;
+        u4 c80 <format=decimal>;
+
+        if (c80) {
+            u4 t84[c80];
+        }
+    }
+} GEN8_e <read=read_GEN8_e,optimize=false>;
+string read_GEN8_e(GEN8_e &in) {
+    local string out;
+    if (in._s < 0x84) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.s04.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    if (h.size) {
+        SetBackColor(0xc0c0c0);
+        GEN8_e d(h.size);
+    }
+} GEN8 <read=read_GEN8,optimize=false>;
+string read_GEN8(GEN8 &in) {
+    return read_HEAD(in.h);
+}
+
+typedef struct {
+    STR name;
+    STR value;
+} OPTN_o <read=read_OPTN_o,optimize=false>;
+string read_OPTN_o(OPTN_o &in) {
+    local string out;
+    SPrintf(out, "'%s'='%s'", in.name.s, in.value.s);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x40) {
+        Printf("short OPTN at %Xh %Xh < 40h\n", FTell(), _s);
+        u1 d[h.size];
+    } else {
+        u4 d00;
+        u4 d04;
+        u4 d08;
+        u4 d0C;
+        u4 d10;
+        u4 d14;
+        u4 d18;
+        u4 d1C;
+        u4 d20;
+        u4 d24;
+        u4 d28;
+        u4 d2C;
+        u4 d30;
+        u4 d34;
+        u4 d38;
+        u4 option_count <format=decimal>;
+
+        if (option_count) {
+            OPTN_o option[option_count];
+        }
+    }
+} OPTN_e <read=read_OPTN_e,optimize=false>;
+string read_OPTN_e(OPTN_e &in) {
+    local string out;
+    SPrintf(out, "%Xh", in._s);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    if (h.size) {
+        SetBackColor(0xc0c0c0);
+        OPTN_e d(h.size);
+    }
+} OPTN <read=read_OPTN,optimize=false>;
+string read_OPTN(OPTN &in) {
+    return read_HEAD(in.h);
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    local int _end;
+    _end = FTell() + _s;
+
+    if (_s < 0x4) {
+        Printf("short EXTN_e3 at %Xh %Xh < 14h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR s00;
+        u4 d04;
+        u4 d08;
+        u4 d0C;
+        STR s10;
+        u4 c14 <format=decimal>;
+        if (c14) {
+            u4 t18[c14];
+        }
+    }
+} EXTN_e3 <read=read_EXTN_e3,optimize=false>;
+string read_EXTN_e3(EXTN_e3 &in) {
+    local string out;
+    if (in._s < 0x14) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.s00.s);
+    }
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    local int _end;
+    _end = FTell() + _s;
+
+    if (_s < 0x14) {
+        Printf("short EXTN_e2 at %Xh %Xh < 14h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR s00;
+        STR s04;
+        STR s08;
+        u4 d0C;
+        u4 c10 <format=decimal>;
+
+        if (c10) {
+            u4 o14[c10];
+
+            local int i, _size2;
+            for (i = 0; i < c10; i++) {
+                FSeek(o14[i]);
+                if (i < c10 - 1) {
+                    _size2 = o14[i + 1] - o14[i];
+                } else {
+                    _size2 = _end - o14[i];
+                }
+                SetBackColor(0xb8b8ff);
+                EXTN_e3 d(_size2);
+            }
+        }
+    }
+} EXTN_e2 <read=read_EXTN_e2,optimize=false>;
+string read_EXTN_e2(EXTN_e2 &in) {
+    local string out;
+    if (in._s < 0x14) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.s00.s);
+    }
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    local int _end;
+    _end = FTell() + _s;
+
+    if (_s < 0x10) {
+        Printf("short EXTN at %Xh %Xh < CCh\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR s00;
+        STR s04;
+        STR s08;
+        u4 c0C <format=decimal>;
+
+        if (c0C) {
+            u4 o10[c0C];
+
+            local int i, _size2;
+            for (i = 0; i < c0C; i++) {
+                FSeek(o10[i]);
+                if (i < c0C - 1) {
+                    _size2 = o10[i + 1] - o10[i];
+                } else {
+                    _size2 = _end - o10[i] - 16;
+                }
+                SetBackColor(0xb8b8ff);
+                EXTN_e2 d(_size2);
+            }
+        }
+    }
+} EXTN_e <read=read_EXTN_e,optimize=false>;
+string read_EXTN_e(EXTN_e &in) {
+    local string out;
+    if (in._s < 0x10) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.s04.s);
+    }
+    return out;
+}
+
+typedef struct {
+    u4 d00;
+    u4 d04;
+    u4 d08;
+    u4 d0C;
+} EXTN_i;
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                EXTN_e d(_size);
+            }
+
+            FSeek(_end - 16 * file_cnt);
+            SetBackColor(0xc8c8ff);
+            EXTN_i e[file_cnt];
+        }
+    }
+} EXTN <read=read_EXTN,optimize=false>;
+string read_EXTN(EXTN &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x24) {
+        Printf("short SOND at %Xh %Xh < 24h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        if (_s > 0x24) {
+//            Printf("long SOND at %Xh %Xh > 24h\n", FTell(), _s);
+        }
+        STR name;
+        u4 d04;
+        STR ext;
+        STR file;
+        u4 d10;
+        float d14;
+        u4 d18;
+        u4 AGRP_index <format=decimal>;
+        s4 AUDO_index <format=decimal>;
+    }
+} SOND_e <read=read_SOND_e,optimize=false>;
+string read_SOND_e(SOND_e &in) {
+    local string out;
+    if (in._s < 0x24) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s' %d", in._s, in.name.s, in.AUDO_index);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                SOND_e d(_size);
+            }
+        }
+    }
+} SOND <read=read_SOND,optimize=false>;
+string read_SOND(SOND &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x4) {
+        Printf("short AGRP at %Xh %Xh < 4h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        if (_s > 0x4) {
+//            Printf("long AGRP at %Xh %Xh > 4h\n", FTell(), _s);
+        }
+        STR name;
+    }
+} AGRP_e <read=read_AGRP_e,optimize=false>;
+string read_AGRP_e(AGRP_e &in) {
+    local string out;
+    if (in._s < 0x4) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.name.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                AGRP_e d(_size);
+            }
+        }
+    }
+} AGRP <read=read_AGRP,optimize=false>;
+string read_AGRP(AGRP &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x4) {
+        Printf("short SPRT at %Xh %Xh < 4h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR name;
+        u4 full_width <format=decimal>;
+        u4 full_height <format=decimal>;
+        u4 d0C;
+        u4 actual_width <format=decimal>;
+        u4 actual_height <format=decimal>;
+        u4 d18;
+        u4 d1C;
+        u4 d20;
+        u4 d24;
+        u4 d28;
+        u4 d2C;
+        s4 origin_x <format=decimal>;
+        s4 origin_y <format=decimal>;
+        u4 TPAG_count <format=decimal>;
+
+        if (TPAG_count) {
+            u4 TPAG_offset[TPAG_count];
+        }
+
+        u4 e00;
+
+        u1 mask[_s - 0x40 - (TPAG_count * 4)];
+    }
+} SPRT_e <read=read_SPRT_e,optimize=false>;
+string read_SPRT_e(SPRT_e &in) {
+    local string out;
+    if (in._s < 0x4) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s' %dx%d", in._s, in.name.s, in.actual_width, in.actual_height);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                SPRT_e d(_size);
+            }
+        }
+    }
+} SPRT <read=read_SPRT,optimize=false>;
+string read_SPRT(SPRT &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x14) {
+        Printf("short BGND at %Xh %Xh < 14h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        if (_s > 0x14) {
+//            Printf("long BGND at %Xh %Xh > 14h\n", FTell(), _s);
+        }
+        STR name;
+        u4 d04;
+        u4 d08;
+        u4 d0C;
+        u4 TPAG_offset;
+    }
+} BGND_e <read=read_BGND_e,optimize=false>;
+string read_BGND_e(BGND_e &in) {
+    local string out;
+    if (in._s < 0x14) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.name.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                BGND_e d(_size);
+            }
+        }
+    }
+} BGND <read=read_BGND,optimize=false>;
+string read_BGND(BGND &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct {
+    float d00;
+    float d04;
+    float d08;
+} PATH_i <read=read_PATH_i>;
+string read_PATH_i(PATH_i &in) {
+    local string out;
+    SPrintf(out, "%f %f %f", in.d00, in.d04, in.d08);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x4) {
+        Printf("short PATH at %Xh %Xh < 4h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR name;
+        u4 d04;
+        u4 d08;
+        u4 d0C;
+        u4 c10 <format=decimal>;
+        if (c10) {
+            PATH_i d[c10];
+        }
+    }
+} PATH_e <read=read_PATH_e,optimize=false>;
+string read_PATH_e(PATH_e &in) {
+    local string out;
+    if (in._s < 0x4) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s' %d", in._s, in.name.s, in.c10);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                PATH_e d(_size);
+            }
+        }
+    }
+} PATH <read=read_PATH,optimize=false>;
+string read_PATH(PATH &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x8) {
+        Printf("short SCPT at %Xh %Xh < 8h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        if (_s > 0x8) {
+//            Printf("long SCPT at %Xh %Xh > 8h\n", FTell(), _s);
+        }
+        STR name;
+        s4 index <format=decimal>;
+    }
+} SCPT_e <read=read_SCPT_e,optimize=false>;
+string read_SCPT_e(SCPT_e &in) {
+    local string out;
+    if (in._s < 0x8) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s' %d", in._s, in.name.s, in.index);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                SCPT_e d(_size);
+            }
+        }
+    }
+} SCPT <read=read_SCPT,optimize=false>;
+string read_SCPT(SCPT &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x6c) {
+        Printf("short SHDR at %Xh %Xh < 6Ch\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        if (_s > 0x6c) {
+//            Printf("long SHDR at %Xh %Xh > 6Ch\n", FTell(), _s);
+        }
+        STR name;
+        u4 d04;
+        STR s08;
+        STR s0C;
+        STR s10;
+        STR s14;
+        STR s18;
+        STR s1C;
+        u4 d20;
+        u4 d24;
+        u4 d28;
+        STR s2C;
+        STR s30;
+        STR s34;
+        u4 d38;
+        u4 d3C;
+        u4 d40;
+        u4 d44;
+        u4 d48;
+        u4 d4C;
+        u4 d50;
+        u4 d54;
+        u4 d58;
+        u4 d5C;
+        u4 d60;
+        u4 d64;
+        u4 d68;
+    }
+} SHDR_e <read=read_SHDR_e,optimize=false>;
+string read_SHDR_e(SHDR_e &in) {
+    local string out;
+    if (in._s < 0x6C) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.name.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                SHDR_e d(_size);
+            }
+        }
+    }
+} SHDR <read=read_SHDR,optimize=false>;
+string read_SHDR(SHDR &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct {
+    u2 d00;
+    u2 d02;
+    u2 d04;
+    u2 d06;
+    u2 d08;
+    u2 d0A;
+    u2 d0C;
+    u2 d0E;
+} FONT_i <read=read_FONT_i>;
+string read_FONT_i(FONT_i &in) {
+    local string out;
+    SPrintf(out, "%Xh", in.d00);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x8) {
+        Printf("short FONT at %Xh %Xh < 8h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR name;
+        STR n04;
+        u4 d08;
+        u4 d0C;
+        u4 d10;
+        u4 d14;
+        u4 d18;
+        u4 TPAG_offset;
+        float d20;
+        float d24;
+        u4 char_cnt <format=decimal>;
+
+        if (char_cnt) {
+            u4 offsets[char_cnt];
+
+            local int i;
+            for (i = 0; i < char_cnt; i++) {
+                FSeek(offsets[i]);
+                FONT_i d;
+            }
+        }
+    }
+} FONT_e <read=read_FONT_e,optimize=false>;
+string read_FONT_e(FONT_e &in) {
+    local string out;
+    if (in._s < 0x8) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s' %d", in._s, in.name.s, in.char_cnt);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size - 512;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                FONT_e d(_size);
+            }
+        }
+
+        FSeek(_end);
+        SetBackColor(0xc8c8ff);
+        u2 chars[256];
+    }
+} FONT <read=read_FONT,optimize=false>;
+string read_FONT(FONT &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    u1 d[_s];
+} TMLN_e <read=read_TMLN_e,optimize=false>;
+string read_TMLN_e(TMLN_e &in) {
+    local string out;
+    SPrintf(out, "%Xh", in._s);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                TMLN_e d(_size);
+            }
+        }
+    }
+} TMLN <read=read_TMLN,optimize=false>;
+string read_TMLN(TMLN &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x4) {
+        Printf("short OBJT at %Xh %Xh < 4h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR name;
+        u1 d[_s - 4];
+    }
+} OBJT_e <read=read_OBJT_e,optimize=false>;
+string read_OBJT_e(OBJT_e &in) {
+    local string out;
+    if (in._s < 0x4) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.name.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                OBJT_e d(_size);
+            }
+        }
+    }
+} OBJT <read=read_OBJT,optimize=false>;
+string read_OBJT(OBJT &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x8) {
+        Printf("short ROOM at %Xh %Xh < 8h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR name;
+        STR n04;
+        u1 d[_s - 8];
+    }
+} ROOM_e <read=read_ROOM_e,optimize=false>;
+string read_ROOM_e(ROOM_e &in) {
+    local string out;
+    if (in._s < 0x8) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in._s, in.name.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                ROOM_e d(_size);
+            }
+        }
+    }
+} ROOM <read=read_ROOM,optimize=false>;
+string read_ROOM(ROOM &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    if (h.size) {
+        SetBackColor(0xc0c0c0);
+        u1 d[h.size];
+    }
+} DAFL <read=read_DAFL,optimize=false>;
+string read_DAFL(DAFL &in) {
+    return read_HEAD(in.h);
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x16) {
+        Printf("short TPAG at %Xh %Xh < 16h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        if (_s > 0x16) {
+//            Printf("long TPAG at %Xh %Xh > 16h\n", FTell(), _s);
+        }
+        u2 d00;
+        u2 d02;
+        u2 d04;
+        u2 d06;
+        u2 d08;
+        u2 d0A;
+        u2 d0C;
+        u2 d0E;
+        u2 d10;
+        u2 d12;
+        u2 d14;
+    }
+} TPAG_e <read=read_TPAG_e,optimize=false>;
+string read_TPAG_e(TPAG_e &in) {
+    local string out;
+    SPrintf(out, "%Xh", in._s);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                TPAG_e d(_size);
+            }
+        }
+    }
+} TPAG <read=read_TPAG,optimize=false>;
+string read_TPAG(TPAG &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x8) {
+        Printf("short CODE at %Xh %Xh < 8h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        STR name;
+        u4 size;
+
+        if (_s < size + 8) {
+            Printf("short CODE at %Xh %Xh < %Xh\n", FTell() - 8, _s, size + 8);
+        } else if (_s > size + 8) {
+//            Printf("long CODE at %Xh %Xh > %Xh\n", FTell() - 8, _s, size + 8);
+        }
+
+        if (size) {
+            SetBackColor(0xa0a0ff);
+            u1 d[size];
+        }
+    }
+} CODE_e <read=read_CODE_e,optimize=false>;
+string read_CODE_e(CODE_e &in) {
+    local string out;
+    if (in._s < 0x8) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh '%s'", in.size, in.name.s);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                CODE_e d(_size);
+            }
+        }
+    }
+} CODE <read=read_CODE,optimize=false>;
+string read_CODE(CODE &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct {
+    STR name;
+    u4 d04;
+    u4 CODE_offset;
+} VARI_e <read=read_VARI_e,optimize=false>;
+string read_VARI_e(VARI_e &in) {
+    local string out;
+    SPrintf(out, "'%s'", in.name.s);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _cnt = h.size / 4 / 3;
+
+    if (h.size) {
+        local int i;
+        for (i = 0; i < _cnt; i ++) {
+            SetBackColor(0xb8b8ff);
+            VARI_e d;
+        }
+    }
+} VARI <read=read_VARI,optimize=false>;
+string read_VARI(VARI &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in._cnt);
+    return out;
+}
+
+typedef struct {
+    STR name;
+    u4 d04;
+    u4 CODE_offset;
+} FUNC_e <read=read_FUNC_e,optimize=false>;
+string read_FUNC_e(FUNC_e &in) {
+    local string out;
+    SPrintf(out, "'%s'", in.name.s);
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _cnt = h.size / 4 / 3;
+
+    if (h.size) {
+        local int i;
+        for (i = 0; i < _cnt; i++) {
+            SetBackColor(0xb8b8ff);
+            FUNC_e d;
+        }
+    }
+} FUNC <read=read_FUNC,optimize=false>;
+string read_FUNC(FUNC &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in._cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x4) {
+        Printf("short STRG at %Xh %Xh < 4h\n", FTell(), _s);
+        u1 d[_s];
+
+        local string d = "";
+    } else {
+        u4 size;
+
+        if (_s < size + 5) {
+            Printf("short STRG at %Xh %Xh < %Xh\n", FTell() - 4, _s, size + 5);
+        } else if (_s > size + 5) {
+//            Printf("long STRG at %Xh %Xh > %Xh\n", FTell() - 4, _s, size + 5);
+        }
+
+        SetBackColor(cNone);
+        char d[size + 1];
+    }
+} STRG_e <read=read_STRG_e,optimize=false>;
+string read_STRG_e(STRG_e &in) {
+    local string out;
+    if (in._s < 0x4) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "'%s'", in.d);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                STRG_e d(_size);
+            }
+        }
+    }
+} STRG <read=read_STRG,optimize=false>;
+string read_STRG(STRG &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size, int _size2) {
+    local int _s = _size;
+    local int _s2 = _size2;
+
+    if (_s < 0x8) {
+        Printf("short TXTR at %Xh %Xh < 8h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        u4 d00;
+        u4 offset;
+
+        if (_s2) {
+            local quad _pos = FTell();
+            FSeek(offset);
+
+            SetBackColor(0xa0ffa0);
+            u1 d[_s2];
+
+            FSeek(_pos);
+        }
+    }
+} TXTR_e <read=read_TXTR_e,optimize=false>;
+string read_TXTR_e(TXTR_e &in) {
+    local string out;
+    if (in._s < 0x8) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh", in._s2);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local u4 offsets2[file_cnt];
+
+            local int i, _size, _size2;
+            for (i = 0; i < file_cnt; i++) {
+                offsets2[i] = ReadInt(offsets[i] + 4);
+            }
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                    _size2 = offsets2[i + 1] - offsets2[i];
+                } else {
+                    _size = _end - offsets[i];
+                    _size2 = _end - offsets2[i];
+                }
+                SetBackColor(0xb8b8ff);
+                TXTR_e d(_size, _size2);
+            }
+        }
+    }
+} TXTR <read=read_TXTR,optimize=false>;
+string read_TXTR(TXTR &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+typedef struct (int _size) {
+    local int _s = _size;
+
+    if (_s < 0x4) {
+        Printf("short AUDO at %Xh %Xh < 4h\n", FTell(), _s);
+        u1 d[_s];
+    } else {
+        u4 size;
+
+        if (_s < size + 4) {
+            Printf("short AUDO at %Xh %Xh < %Xh\n", FTell() - 4, _s, size + 4);
+        } else if (_s > size + 4) {
+//            Printf("long AUDO at %Xh %Xh < %Xh\n", FTell() - 4, _s, size + 4);
+        }
+
+        if (size) {
+            SetBackColor(0xa0ffff);
+            u1 d[size];
+        }
+    }
+} AUDO_e <read=read_AUDO_e,optimize=false>;
+string read_AUDO_e(AUDO_e &in) {
+    local string out;
+    if (in._s < 0x4) {
+        SPrintf(out, "%Xh", in._s);
+    } else {
+        SPrintf(out, "%Xh", in.size);
+    }
+    return out;
+}
+
+typedef struct {
+    HEAD h;
+
+    local int _end;
+    _end = FTell() + h.size;
+
+    if (h.size) {
+        SetBackColor(0xe0e0ff);
+        u4 file_cnt <format=decimal>;
+
+        if (file_cnt) {
+            SetBackColor(0xc8c8ff);
+            u4 offsets[file_cnt];
+
+            local int i, _size;
+            for (i = 0; i < file_cnt; i++) {
+                FSeek(offsets[i]);
+                if (i < file_cnt - 1) {
+                    _size = offsets[i + 1] - offsets[i];
+                } else {
+                    _size = _end - offsets[i];
+                }
+                SetBackColor(0xb8b8ff);
+                AUDO_e d(_size);
+            }
+        }
+    }
+} AUDO <read=read_AUDO,optimize=false>;
+string read_AUDO(AUDO &in) {
+    local string out;
+    SPrintf(out, "%s %Xh %d", in.h.tag, in.h.size, in.file_cnt);
+    return out;
+}
+
+local char _tag[4];
+local quad _full_len, _pos, _len;
+
+DisplayFormatHex();
+LittleEndian();
+
+ReadBytes(_tag, 0, 4);
+
+if (_tag != "FORM") {
+    Warning("Bad sig!");
+    Printf("Bad sig!\n");
+    return -1;
+}
+
+HEAD h;
+
+_full_len = h.size;
+_pos = FTell();
+
+while ((_pos < _full_len) && !FEof()) {
+    ReadBytes(_tag, _pos, 4);
+    _len = ReadUInt(_pos + 4);
+
+    switch(_tag) {
+        case "GEN8":
+            GEN8 d;
+            break;
+
+        case "OPTN":
+            OPTN d;
+            break;
+
+        case "EXTN":
+            EXTN d;
+            break;
+
+        case "SOND":
+            SOND d;
+            break;
+
+        case "AGRP":
+            AGRP d;
+            break;
+
+        case "SPRT":
+            SPRT d;
+            break;
+
+        case "BGND":
+            BGND d;
+            break;
+
+        case "PATH":
+            PATH d;
+            break;
+
+        case "SCPT":
+            SCPT d;
+            break;
+
+        case "SHDR":
+            SHDR d;
+            break;
+
+        case "FONT":
+            FONT d;
+            break;
+
+        case "TMLN":
+            TMLN d;
+            break;
+
+        case "OBJT":
+            OBJT d;
+            break;
+
+        case "ROOM":
+            ROOM d;
+            break;
+
+        case "DAFL":
+            DAFL d;
+            break;
+
+        case "TPAG":
+            TPAG d;
+            break;
+
+        case "CODE":
+            CODE d;
+            break;
+
+        case "VARI":
+            VARI d;
+            break;
+
+        case "FUNC":
+            FUNC d;
+            break;
+
+        case "STRG":
+            STRG d;
+            break;
+
+        case "TXTR":
+            TXTR d;
+            break;
+
+        case "AUDO":
+            AUDO d;
+            break;
+
+        default:
+            DATA d;
+            break;
+    }
+
+    _pos += 8 + _len;
+    FSeek(_pos);
+}

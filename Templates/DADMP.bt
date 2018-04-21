@@ -1,0 +1,32 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: DADMP.bt
+//    Author: Andrew McRae
+//   Version: 0.2
+//   Purpose: Dragon Age Origins addon file
+//  Category: Archive
+// File Mask: *.dadmp
+//   History: 
+//   0.2   2016-03-30 Andrew McRae: Updated header for repo
+//   0.1   2012-06-01 Andrew McRae: Initial revision
+//------------------------------------------------
+
+DisplayFormatHex();
+LittleEndian();
+
+typedef struct {
+    uint Length;
+    char Data[Length];
+} DA_STRING <read=DA_STRINGread>;
+
+string DA_STRINGread(DA_STRING &in) {
+    return in.Data;
+}
+
+SetBackColor(0xe0e0e0);
+DA_STRING game;
+DA_STRING addon;
+DA_STRING version;
+DA_STRING filename;
+DA_STRING url;
