@@ -35,6 +35,7 @@ string fixed16_16Read(fixed16_16 f)
     return s;
 }
 
+
 void fixed16_16Write(fixed16_16& f, string s)
 {
     f = (fixed16_16)(Atof(s) * 65536);
@@ -372,8 +373,8 @@ struct HeadTable
     uint16 flagsAppleReserved : 6;                  // Bits 5-10: These should be set according to Apple's specification . However, they are not implemented in OpenType.
     uint16 flagsLosslessCompression : 1;            // Bit 11: Font data is 'lossless,' as a result of having been compressed and decompressed with the Agfa MicroType Express engine.
     uint16 flagsFontConverted : 1;                  // Bit 12: Font converted (produce compatible metrics)
-    uint16 flagsClearTypeOptimized : 1;             // Bit 13: Font optimized for ClearType™. Note, fonts that rely on embedded bitmaps (EBDT) for rendering should not be considered optimized for ClearType, and therefore should keep this bit cleared.
-    uint16 flagsLastResortFont : 1;                 // Bit 14: Last Resort font. If set, indicates that the glyphs encoded in the cmap subtables are simply generic symbolic representations of code point ranges and don’t truly represent support for those code points. If unset, indicates that the glyphs encoded in the cmap subtables represent proper support for those code points.
+    uint16 flagsClearTypeOptimized : 1;             // Bit 13: Font optimized for ClearTypeÂ™. Note, fonts that rely on embedded bitmaps (EBDT) for rendering should not be considered optimized for ClearType, and therefore should keep this bit cleared.
+    uint16 flagsLastResortFont : 1;                 // Bit 14: Last Resort font. If set, indicates that the glyphs encoded in the cmap subtables are simply generic symbolic representations of code point ranges and donÂ’t truly represent support for those code points. If unset, indicates that the glyphs encoded in the cmap subtables represent proper support for those code points.
     uint16 flagsReserved : 1;                       // Bit 15: Reserved, set to 0
 
     uint16 unitsPerEm;          // Valid range is from 16 to 16384. This value should be a power of 2 for fonts that have TrueType outlines.
@@ -1116,7 +1117,7 @@ struct MaxpTable
         uint16 maxInstructionDefs; // Number of IDEFs. 
         uint16 maxStackElements; // Maximum stack depth2. 
         uint16 maxSizeOfInstructions; // Maximum byte count for glyph instructions. 
-        uint16 maxComponentElements; // Maximum number of components referenced at “top level” for any composite glyph. 
+        uint16 maxComponentElements; // Maximum number of components referenced at Â“top levelÂ” for any composite glyph. 
         uint16 maxComponentDepth; // Maximum levels of recursion; 1 for simple components. 
     }
 };
@@ -3024,7 +3025,7 @@ struct DsigTable
 struct LtshTable // Linear Threshold
 {
     uint16 version; // Version number (starts at 0).
-    uint16 numberOfGlyphs; // Number of glyphs (from “numGlyphs” in 'maxp' table).
+    uint16 numberOfGlyphs; // Number of glyphs (from Â“numGlyphsÂ” in 'maxp' table).
     uint8  yPels[numberOfGlyphs]; // The vertical pel height at which the glyph can be assumed to scale linearly. On a per glyph basis.
 };
 
@@ -3126,7 +3127,7 @@ struct GaspTable
         GaspBehaviorGridFit            = 0x0001, // Use gridfitting - medium sizes, typically 9<=ppem<=16
         GaspBehaviorDoGray             = 0x0002, // Use grayscale rendering - small sizes, typically ppem<9
         GaspBehaviorSymmetricGridFit   = 0x0004, // Use gridfitting with ClearType symmetric smoothing. Only supported in version 1 gasp - typically always enabled.
-        GaspBehaviorSymmetricSmoothing = 0x0008, // Use smoothing along multiple axes with ClearType®. Only supported in version 1 gasp - larger screen sizes, typically ppem>15, most commonly used with the gridfit flag.
+        GaspBehaviorSymmetricSmoothing = 0x0008, // Use smoothing along multiple axes with ClearTypeÂ®. Only supported in version 1 gasp - larger screen sizes, typically ppem>15, most commonly used with the gridfit flag.
     } GaspBehavior;
 
     struct GaspRange
@@ -3136,7 +3137,7 @@ struct GaspTable
         uint16 gaspBehaviorGridFit            : 1; // Bit 0: Use gridfitting - medium sizes, typically 9<=ppem<=16
         uint16 gaspBehaviorDoGray             : 1; // Bit 1: Use grayscale rendering - small sizes, typically ppem<9
         uint16 gaspBehaviorSymmetricGridFit   : 1; // Bit 2: Use gridfitting with ClearType symmetric smoothing. Only supported in version 1 gasp - typically always enabled.
-        uint16 gaspBehaviorSymmetricSmoothing : 1; // Bit 3: Use smoothing along multiple axes with ClearType®. Only supported in version 1 gasp - larger screen sizes, typically ppem>15, most commonly used with the gridfit flag.
+        uint16 gaspBehaviorSymmetricSmoothing : 1; // Bit 3: Use smoothing along multiple axes with ClearTypeÂ®. Only supported in version 1 gasp - larger screen sizes, typically ppem>15, most commonly used with the gridfit flag.
     };
     GaspRange gaspRanges[gaspRangesCount]; // Sorted by ppem
 };
