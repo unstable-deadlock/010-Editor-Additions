@@ -1,0 +1,46 @@
+//--------------------------------------
+//--- 010 Editor v2.1.3 Script File
+//
+// File: CreateMassData.1sc
+// Author: Dieter Lamberty
+// Revision: 1.0
+// Purpose: Creates files with up to 1million characters for the use as
+// 		input in data fields to check the data boundaries.
+//--------------------------------------
+
+int count = InputNumber("Number of Characters", "Please enter the number of characters you wish to enter", "100");
+if (count == BAD_VALUE) {
+	Exit(1);
+}
+
+const int BLOCKSIZE = 10;
+const int BLOCKCOUNT = 99999;
+
+const int MAXIMUM = BLOCKSIZE * BLOCKCOUNT;
+
+if (count < 1) {
+	MessageBox(idOk, "Invalid input", "Only positive numbers >=1 allowed");
+	Exit(2);
+}
+if (count > MAXIMUM) {
+	int result = MessageBox(idYes|idNo, "Maximum exeeded", "The maximum of %u characters is exeeded The file size won't be correct. Continue?", MAXIMUM);
+	if (result == idNo) {
+		Exit(3);
+	}
+}
+
+
+FileNew();
+int handle = GetFileNum();
+
+int blocks = count / BLOCKSIZE;
+int i;
+
+for (i = 0; i < blocks; i++) {
+	FPrintf(handle, "123A%5uA", i + 1);
+}
+
+int mod = count % BLOCKSIZE;
+for (i = 0; i < mod; i++) {
+	FPrintf(handle, "X");
+}

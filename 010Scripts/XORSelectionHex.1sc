@@ -1,0 +1,52 @@
+//--------------------------------------
+//--- 010 Editor v4.0.1 Script File
+//
+// File: XORSelectionHex.1sc
+// Author: yoggy (https://github.com/yoggy)
+// Revision: 1.0
+// Purpose: This script was created by modifying XORSelection.1sc.
+//    You can enter the XOR key in HEX style.
+//--------------------------------------
+int i;
+int iStart, size, iKeyLength, iHexKeyLength;
+string sKey, sHexKey = "";
+char cHex;
+string sHex;
+string sTemp;
+
+// Check that a file is open
+if (FileCount() == 0) {
+    MessageBox(idOk, "XORSelectionHex", "XORSelectionHex can only be executed when a file is loaded.");
+    return -1;
+}
+
+// Initializes the variables
+size = GetSelSize();
+iStart = GetSelStart();
+
+// Check that bytes were selected
+if (size == 0) {
+    MessageBox( idOk, "XORSelectionHex", "Please select bytes before running this script." );
+    return -1;
+}
+
+// input hex key string
+sKey = InputString("XORSelectionHex", "Input the XOR hex key (ex.\"50,4b,03,04\")", "50,4b,03,04");
+if (sKey == "") {
+    MessageBox(idOk, "XORSelectionHex", "Please enter a valid hex key.");
+    return -1;
+}
+iKeyLength = Strlen(sKey);
+iHexKeyLength = (int)((iKeyLength / 3.0) + 1.0);
+
+for (i = 0; i < iHexKeyLength; i++) {    
+    sHex = SubStr(sKey, i * 3, 2);
+    SScanf(sHex, "%02x", cHex);
+    sHexKey += (cHex & (char)0xff);
+}
+Printf("key=%s\n", sHexKey);
+
+// Modify the selection
+for (i = 0; i < size; i++) {
+    WriteUByte(iStart + i, ReadUByte(iStart + i) ^ sHexKey[i % iHexKeyLength]);
+}

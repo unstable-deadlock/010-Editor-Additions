@@ -1,0 +1,34 @@
+//--------------------------------------
+//--- 010 Editor v4.0.3 Script File
+//
+// File:     CopyAsBinary.1sc
+// Author:   SweetScape Software
+// Revision: 1.0
+// Purpose:  Copies the selected bytes to
+//  the clipboard in binary format.
+//--------------------------------------
+int  pos, start, size;
+char str[65535];
+
+// Get the size of the selection
+start = GetSelStart(); 
+size  = GetSelSize();
+if( size == 0 )
+{
+    MessageBox( idOk, GetScriptName(), "%s can only be executed when a selection is made.", GetScriptName() );
+    return -1;
+}
+
+// Read the bytes
+for( pos = 0; pos < size; pos++ )
+{
+    str += IntToBinaryStr( ReadUByte( start+pos ) );
+    if( pos % 8 == 7 )
+        str += "\r\n";
+    else
+        str += " ";
+}
+
+// Copy bytes to the clipboard
+CopyStringToClipboard( str );
+StatusMessage( "Copied %d bytes to the clipboard.", size );

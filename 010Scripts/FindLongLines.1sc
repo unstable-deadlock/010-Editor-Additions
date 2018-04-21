@@ -1,0 +1,26 @@
+//--------------------------------------
+//--- 010 Editor v4.0.1 Script File
+//
+// File:     FindLongLines.1sc
+// Author:   SweetScape Software
+// Revision: 1.0
+// Purpose:  Prints out all text lines in
+//      a file that are longer than a 
+//      certain tolerance.
+//--------------------------------------
+
+#define LONG_LINE_SIZE 400 // the target line length
+
+int64 i, width, foundCount = 0, count = TextGetNumLines();
+for( i = 0; i < count; i++ )
+{
+    // Iterate through each line
+    width = TextGetLineSize( i );
+    if( width > LONG_LINE_SIZE )
+    {
+        Printf( "Long line %d has %d characters\n", i+1, width );
+        foundCount++;
+    }
+}
+Printf( "%d long lines found\n", foundCount );
+

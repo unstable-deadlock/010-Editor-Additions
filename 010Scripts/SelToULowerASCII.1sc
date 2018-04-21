@@ -1,0 +1,31 @@
+//--------------------------------------
+//--- 010 Editor v3.2.2l Script File
+//
+// File: SelToULowerASCII.1sc
+// Author: Artur Babecki
+// Revision: 24.02.2012
+// Purpose:  Functions:
+//           SelToULowerASCII(); - convert  the ASCII characters to lower case in the selected block
+//                                the first letter in the block is converted to upper case   
+//-----------------------------------
+
+SelToULowerASCII();
+
+//-----------------------------------
+void SelToULowerASCII()
+{
+    local int64 sel,start;
+    local uchar buf[1024];
+    local int i;
+    sel=GetSelSize();
+    start=GetSelStart();
+    ReadBytes(buf,start,sel) ;
+    if ( buf[0]>='a' && buf[0]<='z')
+           buf[0]-=0x20;
+for (i=1;i<sel-1;i++) {
+    if ( buf[i]>='A' && buf[i]<='Z'){
+      buf[i]+=0x20;}
+     WriteBytes( buf,start,sel );
+    }
+}
+//------------------------------------------------

@@ -1,0 +1,63 @@
+//---------------------------------------------------------------------------
+/*
+	010 Editor Script To format a Microsoft GUID
+	2010/08/29 v0.0.1
+
+	Source code put in public domain by Didier Stevens, no Copyright
+	https://DidierStevens.com
+	Use at your own risk
+
+	History:
+		2010/08/11: start development with 010 Editor v3.1.2
+		2010/08/29: added CopyStringToClipboard
+	Todo:
+
+*/
+//---------------------------------------------------------------------------
+
+void ReadGUID123(int64 iPosition, int32 &iData1, int16 &iData2, int16 &iData3)
+{
+    iData1 = ReadUInt(iPosition);
+    iPosition += 4;
+    iData2 = ReadUShort(iPosition);
+    iPosition += 2;
+    iData3 = ReadUShort(iPosition);
+    iPosition += 2;
+}
+
+void ReadGUID4(int64 iPosition, int16 &iData4a, int16 &iData4b, int32 &iData4c)
+{
+    iData4a = ReadUShort(iPosition);
+    iPosition += 2;
+    iData4b = ReadUShort(iPosition);
+    iPosition += 2;
+    iData4c = ReadUInt(iPosition);
+    iPosition += 4;
+}
+
+string FormatGUID(int64 iPosition)
+{
+    string sGUID;
+    int32 iData1;
+    int16 iData2;
+    int16 iData3;
+    int16 iData4a;
+    int16 iData4b;
+    int32 iData4c;
+    int iStartedAsBigEndian;
+
+    iStartedAsBigEndian = IsBigEndian();
+    LittleEndian();
+    ReadGUID123(iPosition, iData1, iData2, iData3);
+    BigEndian();
+    ReadGUID4(iPosition + 8, iData4a, iData4b, iData4c);
+    if (!iStartedAsBigEndian)
+        LittleEndian();
+    SPrintf(sGUID, "{%08X-%04X-%04X-%04X-%04X%08X}", iData1, iData2, iData3, iData4a, iData4b, iData4c);
+
+    return sGUID;
+}
+
+string GUID = FormatGUID(GetCursorPos());
+CopyStringToClipboard(GUID);
+Printf("GUID = %s\n", GUID);

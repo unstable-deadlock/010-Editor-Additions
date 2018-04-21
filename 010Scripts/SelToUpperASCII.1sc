@@ -1,0 +1,31 @@
+//--------------------------------------
+//--- 010 Editor v3.2.2l Script File
+//
+// File: SelToUpperASCII.1sc
+// Author: Artur Babecki
+// Revision: 24.02.2012
+// Purpose:  Functions:
+//           SelToUpperASCII(); - convert  the ASCII characters to upper case in the selected block
+//--------------------------------------
+
+
+SelToUpperASCII();
+
+//-----------------------------------
+void SelToUpperASCII()
+{
+    local int64 sel,start;
+    local uchar buf[1024];
+    local int i;
+    sel=GetSelSize();
+    start=GetSelStart();
+    ReadBytes(buf,start,sel) ;
+    for (i=0;i<sel;i++) {
+    if ( buf[i]>='a' && buf[i]<='z'){
+    buf[i]-=0x20;}
+    WriteBytes( buf,start,sel );
+}
+//---------------------------------------
+}
+
+//------------------------------------------------
